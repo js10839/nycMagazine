@@ -1,0 +1,197 @@
+import { useState, useEffect } from 'react';
+import './App.css';
+import starryNight from './images/TheStarryNight.png';
+
+const DEFAULT_ARTICLES = [
+  { id: 1, date: '16. March 2022', category: 'ART', title: 'Hope dies last', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.', author: 'Jakob Gronberg', duration: '1 Min' },
+  { id: 2, date: '16. March 2022', category: 'ART', title: "Don't close your eyes", description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.', author: 'Jakob Gronberg', duration: '1 Min' },
+  { id: 3, date: '16. March 2022', category: 'SCULPTURES', title: 'The best art museums', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.', author: 'Jakob Gronberg', duration: '1 Min' },
+  { id: 4, date: '16. March 2022', category: 'ART', title: 'The devil is the details', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.', author: 'Jakob Gronberg', duration: '1 Min' },
+  { id: 5, date: '16. March 2022', category: 'ART', title: 'An indestructible hope', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.', author: 'Jakob Gronberg', duration: '1 Min' },
+  { id: 6, date: '16. March 2022', category: 'STREET ART', title: 'Street art festival', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.', author: 'Jakob Gronberg', duration: '1 Min' },
+  { id: 7, date: '16. March 2022', category: 'SCULPTURES', title: 'Stone and silence', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.', author: 'Jakob Gronberg', duration: '1 Min' },
+  { id: 8, date: '16. March 2022', category: 'ART', title: 'Color of the year', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.', author: 'Jakob Gronberg', duration: '1 Min' },
+  { id: 9, date: '16. March 2022', category: 'STREET ART', title: 'Walls that speak', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.', author: 'Jakob Gronberg', duration: '1 Min' },
+];
+
+const CATEGORIES = ['ALL', 'ART', 'STREET ART', 'SCULPTURES'];
+
+function getStoredArticles() {
+  try {
+    const stored = localStorage.getItem('nyc-articles');
+    return stored ? JSON.parse(stored) : DEFAULT_ARTICLES;
+  } catch {
+    return DEFAULT_ARTICLES;
+  }
+}
+
+function saveArticles(articles) {
+  localStorage.setItem('nyc-articles', JSON.stringify(articles));
+}
+
+const EMPTY_FORM = { title: '', category: 'ART', description: '', author: '', duration: '', image: null };
+
+function ArticleCard({ article, onDelete }) {
+  return (
+    <div className="card">
+      <div className="card-meta">
+        <span className="card-date">{article.date}</span>
+        <span className="card-category">{article.category}</span>
+      </div>
+      <div className="card-image">
+        <img src={article.image || starryNight} alt={article.title} />
+      </div>
+      <h3 className="card-title">{article.title}</h3>
+      <p className="card-description">{article.description}</p>
+      <div className="card-footer">
+        <span><strong>Text</strong> {article.author}</span>
+        <span><strong>Duration</strong> {article.duration}</span>
+        <button className="delete-btn" onClick={() => onDelete(article.id)}>Delete</button>
+      </div>
+    </div>
+  );
+}
+
+function NewArticleModal({ onClose, onSubmit }) {
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  function handleChange(e) {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!form.title.trim() || !form.description.trim() || !form.author.trim()) {
+      setError('Title, description, and author are required.');
+      return;
+    }
+    onSubmit(form);
+    onClose();
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">New Article</h2>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <form onSubmit={handleSubmit} className="modal-form">
+          <label>
+            Title *
+            <input name="title" value={form.title} onChange={handleChange} placeholder="Article title" />
+          </label>
+          <label>
+            Category
+            <select name="category" value={form.category} onChange={handleChange}>
+              {CATEGORIES.filter(c => c !== 'ALL').map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Description *
+            <textarea name="description" value={form.description} onChange={handleChange} placeholder="Write your article content..." rows={5} />
+          </label>
+          <label>
+            Author *
+            <input name="author" value={form.author} onChange={handleChange} placeholder="Your name" />
+          </label>
+          <label>
+            Duration
+            <input name="duration" value={form.duration} onChange={handleChange} placeholder="e.g. 3 Min" />
+          </label>
+          {error && <p className="form-error">{error}</p>}
+          <div className="modal-actions">
+            <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn-primary">Publish</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [articles, setArticles] = useState(getStoredArticles);
+  const [activeCategory, setActiveCategory] = useState('ALL');
+  const [showModal, setShowModal] = useState(false);
+
+  function handlePublish(form) {
+    const now = new Date();
+    const date = now.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+    const newArticle = {
+      id: Date.now(),
+      date,
+      category: form.category,
+      title: form.title,
+      description: form.description,
+      author: form.author,
+      duration: form.duration || '1 Min',
+    };
+    const updated = [newArticle, ...articles];
+    setArticles(updated);
+    saveArticles(updated);
+  }
+
+  function handleDelete(id) {
+    const updated = articles.filter(a => a.id !== id);
+    setArticles(updated);
+    saveArticles(updated);
+  }
+
+  const filtered = activeCategory === 'ALL'
+    ? articles
+    : articles.filter(a => a.category === activeCategory);
+
+  return (
+    <div className="app">
+      <nav className="nav">
+        <span className="nav-brand">NYC MAGAZINE</span>
+        <div className="nav-links">
+          <a href="#">Magazine</a>
+          <a href="#">Authors</a>
+          <a href="#">Podcast</a>
+          <button className="nav-post-btn" onClick={() => setShowModal(true)}>+ New Article</button>
+        </div>
+      </nav>
+
+      <div className="hero">
+        <h1 className="hero-slogan">The New York Guide for Gen Z</h1>
+      </div>
+
+      <div className="categories-bar">
+        <span className="categories-label">CATEGORIES</span>
+        <div className="category-filters">
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat}
+              className={`filter-btn ${activeCategory === cat ? 'active' : ''}`}
+              onClick={() => setActiveCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid">
+        {filtered.map(article => (
+          <ArticleCard key={article.id} article={article} onDelete={handleDelete} />
+        ))}
+      </div>
+
+      {showModal && (
+        <NewArticleModal onClose={() => setShowModal(false)} onSubmit={handlePublish} />
+      )}
+    </div>
+  );
+}
+
+export default App;
