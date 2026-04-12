@@ -1,5 +1,5 @@
 import { GrLocation } from "react-icons/gr";
-import "./App.css";
+import "./Mag.css";
 
 export default function App() {
   return (
