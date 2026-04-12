@@ -1,23 +1,20 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import Navbar from "./components/Navbar";
+import TodaysCourse from "./components/TodaysCourse";
+import Contents from "./components/Contents";
+import places from "./data/places";
+
+// First 3 places are featured in the slider
+const todayCards = places.slice(0, 3);
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>hello.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <Navbar />
+      <main>
+        <TodaysCourse todayCards={todayCards} />
+        <Contents places={places} />
+      </main>
     </div>
   );
 }
