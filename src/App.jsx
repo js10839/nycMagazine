@@ -1,140 +1,298 @@
-import React, { useState, useRef } from 'react';
+import { useState } from "react";
 import { GrLocation } from "react-icons/gr";
 import "./App.css";
 
+const featuredPlaces = [
+  {
+    title: "Course at The High Line",
+    location: "Chelsea, Manhattan",
+    desc: "An elevated park built on historic freight rail line. Unique gardens, art installations, and city views—all completely free.",
+    tags: ["FREE", "SCENIC"],
+  },
+  {
+    title: "Course at Staten Island Ferry",
+    location: "Lower Manhattan",
+    desc: "Free ferry ride with incredible views of the Statue of Liberty and Manhattan skyline.",
+    tags: ["FREE", "SCENIC", "TOURIST SPOT"],
+  },
+  {
+    title: "Course at Grand Central Terminal",
+    location: "Midtown East",
+    desc: "Marvel at this Beaux-Arts masterpiece. Visit the whispering gallery and see the famous celestial ceiling for free.",
+    tags: ["FREE", "TOURIST SPOT", "RAINY DAY"],
+  },
+  {
+    title: "Course at Brooklyn Bridge",
+    location: "Brooklyn, NY",
+    desc: "Walk across one of NYC's most famous bridges with skyline views.",
+    tags: ["FREE", "SCENIC", "TOURIST SPOT"],
+  },
+  {
+    title: "Course at Central Park",
+    location: "Manhattan, NY",
+    desc: "Huge urban park in NYC with lakes, walking paths, and nature escape.",
+    tags: ["FREE", "SCENIC"],
+  },
+  {
+    title: "Course at DUMBO Waterfront",
+    location: "Brooklyn, NY",
+    desc: "One of the best skyline views in the city with cobblestone streets.",
+    tags: ["FREE", "SCENIC", "TOURIST SPOT"],
+  },
+  {
+    title: "Course at The Vessel",
+    location: "Hudson Yards",
+    desc: "Climb the 2,500 steps of this honeycomb sculpture for panoramic Hudson River views.",
+    tags: ["TOURIST SPOT"],
+  },
+  {
+    title: "Course at Governors Island",
+    location: "New York Harbor",
+    desc: "A car-free island with sweeping views of lower Manhattan and the Statue of Liberty.",
+    tags: ["FREE", "SCENIC"],
+  },
+  {
+    title: "Course at Tenement Museum",
+    location: "Lower East Side",
+    desc: "Experience immigrant history firsthand through guided tours of a preserved tenement building.",
+    tags: ["TOURIST SPOT", "RAINY DAY"],
+  },
+];
+
+const places = [
+  {
+    title: "The High Line",
+    location: "Chelsea, Manhattan",
+    desc: "An elevated park built on an old freight rail line in NYC with gardens, art installations, and city views—all completely free.",
+    tags: ["FREE", "SCENIC"],
+  },
+  {
+    title: "Staten Island Ferry",
+    location: "Lower Manhattan",
+    desc: "Free ferry ride with incredible views of the Statue of Liberty and Manhattan skyline. Runs 24/7 and takes 25 minutes.",
+    tags: ["FREE", "SCENIC", "TOURIST SPOT"],
+  },
+  {
+    title: "Grand Central Terminal",
+    location: "Midtown East",
+    desc: "Marvel at this Beaux-Arts masterpiece. Visit the whispering gallery and see the famous celestial ceiling for free.",
+    tags: ["FREE", "TOURIST SPOT", "RAINY DAY"],
+  },
+  {
+    title: "The High Line",
+    location: "Chelsea, Manhattan",
+    desc: "An elevated park built on an old freight rail line in NYC with gardens, art installations, and city views—all completely free.",
+    tags: ["FREE", "SCENIC"],
+  },
+  {
+    title: "Staten Island Ferry",
+    location: "Lower Manhattan",
+    desc: "Free ferry ride with incredible views of the Statue of Liberty and Manhattan skyline. Runs 24/7 and takes 25 minutes.",
+    tags: ["FREE", "SCENIC", "TOURIST SPOT"],
+  },
+  {
+    title: "Grand Central Terminal",
+    location: "Midtown East",
+    desc: "Marvel at this Beaux-Arts masterpiece. Visit the whispering gallery and see the famous celestial ceiling for free.",
+    tags: ["FREE", "TOURIST SPOT", "RAINY DAY"],
+  },
+  {
+    title: "The High Line",
+    location: "Chelsea, Manhattan",
+    desc: "An elevated park built on an old freight rail line in NYC with gardens, art installations, and city views—all completely free.",
+    tags: ["FREE", "SCENIC"],
+  },
+  {
+    title: "Staten Island Ferry",
+    location: "Lower Manhattan",
+    desc: "Free ferry ride with incredible views of the Statue of Liberty and Manhattan skyline. Runs 24/7 and takes 25 minutes.",
+    tags: ["FREE", "SCENIC", "TOURIST SPOT"],
+  },
+  {
+    title: "Grand Central Terminal",
+    location: "Midtown East",
+    desc: "Marvel at this Beaux-Arts masterpiece. Visit the whispering gallery and see the famous celestial ceiling for free.",
+    tags: ["FREE", "TOURIST SPOT", "RAINY DAY"],
+  },
+];
+
+const VISIBLE = 3;
+
+function getCardStyle(offset) {
+  const base = {
+    position: "absolute",
+    width: "75%",
+    top: 0,
+    left: 0,
+    height: "100%",
+    transition: "transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.45s ease",
+  };
+  if (offset === 0) return { ...base, transform: "translateX(0%)", zIndex: 10, opacity: 1, cursor: "grab" };
+  if (offset === 1) return { ...base, transform: "translateX(80%)", zIndex: 6, opacity: 1, cursor: "pointer" };
+  if (offset === 2) return { ...base, transform: "translateX(90%)", zIndex: 3, opacity: 1, cursor: "pointer" };
+  return { ...base, transform: "translateX(100%)", zIndex: 1, opacity: 0, pointerEvents: "none" };
+}
+
 export default function App() {
-  const places = [
-    { title: "The Highline", location: "Chelsea, Manhattan", desc: "An elevated park built on an old freight rail line.", tags: ["FREE", "SCENIC"] },
-    { title: "Staten Island Ferry", location: "Staten Island, NY", desc: "Free ferry ride with amazing views.", tags: ["FREE", "TOURIST SPOT", "SCENIC"] },
-    { title: "Grand Central Terminal", location: "Midtown Manhattan, NY", desc: "Historic Beaux-Arts train station.", tags: ["FREE", "RAINY DAY", "SCENIC"] },
-    { title: "Brooklyn Bridge Walk", location: "Brooklyn, NY", desc: "Walk across NYC's most famous bridges.", tags: ["FREE", "TOURIST SPOT", "SCENIC"] },
-    { title: "Central Park", location: "Manhattan, NY", desc: "Huge urban park.", tags: ["FREE", "RAINY DAY", "SCENIC"] },
-  ];
+  const [current, setCurrent] = useState(0);
+  const [dragStartX, setDragStartX] = useState(null);
 
-  const [index, setIndex] = useState(0);
-  const isDragging = useRef(false);
-  const startX = useRef(0);
-  const cardRef = useRef(null);
+  const goTo = (idx) => { if (idx !== current) setCurrent(idx); };
+  const next = () => { if (current < featuredPlaces.length - 1) setCurrent(c => c + 1); };
+  const prev = () => { if (current > 0) setCurrent(c => c - 1); };
 
-  const nextIndex = (index + 1) % places.length;
-  const thirdIndex = (index + 2) % places.length;
-
-  const currentCard = places[index];
-  const nextCard = places[nextIndex];
-  const thirdCard = places[thirdIndex];
-
-  const onStart = (e) => {
-    isDragging.current = true;
-    startX.current = e.pageX || (e.touches && e.touches[0].clientX);
-    if (cardRef.current) cardRef.current.style.transition = 'none';
+  const handleMouseDown = (e) => setDragStartX(e.clientX);
+  const handleMouseUp = (e) => {
+    if (dragStartX === null) return;
+    const diff = dragStartX - e.clientX;
+    if (diff > 40) next();
+    else if (diff < -40) prev();
+    setDragStartX(null);
+  };
+  const handleTouchStart = (e) => setDragStartX(e.touches[0].clientX);
+  const handleTouchEnd = (e) => {
+    if (dragStartX === null) return;
+    const diff = dragStartX - e.changedTouches[0].clientX;
+    if (diff > 40) next();
+    else if (diff < -40) prev();
+    setDragStartX(null);
   };
 
-  const onMove = (e) => {
-    if (!isDragging.current) return;
-    const walk = (e.pageX || e.touches[0].clientX) - startX.current;
-    if (walk < 0 && cardRef.current)
-      cardRef.current.style.transform = `translateX(${walk}px) rotate(5deg)`;
-  };
-
-  const onEnd = (e) => {
-    if (!isDragging.current) return;
-    isDragging.current = false;
-    const walk = ((e.changedTouches && e.changedTouches[0].clientX) || e.pageX) - startX.current;
-    if (!cardRef.current) return;
-    if (walk < -100) {
-      cardRef.current.style.transition = '0.4s ease-out';
-      cardRef.current.style.transform = 'translateX(-120vw) rotate(-20deg)';
-      setTimeout(() => {
-        setIndex(nextIndex);
-        if (cardRef.current) cardRef.current.style.transition = 'none';
-      }, 400);
-    } else {
-      cardRef.current.style.transition = '0.2s ease-out';
-      cardRef.current.style.transform = 'translateX(0) rotate(5deg)';
-    }
-  };
+  const visibleCards = Array.from({ length: VISIBLE }, (_, i) => {
+    const idx = current + i;
+    if (idx >= featuredPlaces.length) return null;
+    return { ...featuredPlaces[idx], idx, offset: i };
+  }).filter(Boolean).reverse();
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      overflow: 'hidden',
-      background: '#f0f0f0'
-    }}>
+    <>
 
-      <div style={{
-        position: 'relative',
-        width: '320px',
-        height: '480px',
-        userSelect: 'none'
-      }}>
+      <nav className="nav">
+        <span className="nav-brand">NYC EDIT</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2">
+          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      </nav>
+      <div className="nav-line" />
 
-        <div className="card" key={`third-${thirdIndex}`}
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            top: 0,
-            left: 0,
-            zIndex: 1,
-            transform: 'rotate(3deg) scale(0.9)'
-          }}>
-          <div className="img" style={{ height: '220px' }} />
-          <div className="card-body">
-            {thirdCard.tags.map((tag, i) => <span key={i} className={tag === "FREE" ? "badge" : "blackb"}>{tag}</span>)}
-            <h3>{thirdCard.title}</h3>
-            <p>{thirdCard.desc}</p>
-            <div className="location"><GrLocation /><span>{thirdCard.location}</span></div>
-          </div>
-        </div>
 
-        <div className="card" key={`next-${nextIndex}`}
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            top: 0,
-            left: 0,
-            zIndex: 2,
-            transform: 'rotate(-5deg)'
-          }}>
-
-          <div className="img" style={{ height: '220px' }} />
-          <div className="card-body">
-            {nextCard.tags.map((tag, i) => <span key={i} className={tag === "FREE" ? "badge" : "blackb"}>{tag}</span>)}
-            <h3>{nextCard.title}</h3>
-            <p>{nextCard.desc}</p>
-            <div className="location"><GrLocation /><span>{nextCard.location}</span></div>
-          </div>
-        </div>
-
-        <div className="card" ref={cardRef} key={`current-${index}`}
-          onMouseDown={onStart} onMouseMove={onMove} onMouseUp={onEnd} onMouseLeave={onEnd}
-          onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            top: 0,
-            left: 0,
-            zIndex: 3,
-            cursor: 'grab',
-            transform: 'rotate(5deg)',
-            transition: 'all 0.3s ease-out'
-          }}>
-
-          <div className="img" style={{ height: '220px' }} />
-          <div className="card-body">
-            {currentCard.tags.map((tag, i) => <span key={i} className={tag === "FREE" ? "badge" : "blackb"}>{tag}</span>)}
-            <h3>{currentCard.title}</h3>
-            <p>{currentCard.desc}</p>
-            <div className="location"><GrLocation /><span>{currentCard.location}</span></div>
-          </div>
-        </div>
-
+      <div className="section-label">
+        <span>TODAY'S COURSE</span>
+        <span className="arrow">→</span>
       </div>
-    </div>
+
+
+      <div className="course-section">
+
+
+        <div className="slider-col">
+          <div
+            className="slider-window"
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="stack-container">
+              {visibleCards.map(({ idx, offset, title, location, desc, tags }) => (
+                <div
+                  key={idx}
+                  className="card"
+                  style={getCardStyle(offset)}
+                  onClick={() => offset > 0 && goTo(idx)}
+                >
+                  <div className="img" />
+                  <div className="card-body">
+                    {tags.map((tag, i) => (
+                      <span key={i} className={tag === "FREE" ? "badge" : "blackb"}>
+                        {tag}
+                      </span>
+                    ))}
+                    <h3>{title.replace("Course at ", "")}</h3>
+                    <p>{desc}</p>
+                    <div className="location">
+                      <GrLocation className="location-icon" />
+                      <span>{location}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="slider-dots">
+            {featuredPlaces.map((_, i) => (
+              <button
+                key={i}
+                className="dot"
+                onClick={() => goTo(i)}
+                style={{
+                  backgroundColor: i === current ? "#ff007a" : "#ccc",
+                  width: i === current ? 20 : 8,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+
+        <div className="desc-panel">
+          <h1>Lower Manhattan Budget Day</h1>
+          <p>
+            A full day exploring downtown Manhattan's most iconic spots without
+            breaking the bank. This route takes you from Battery Park through the
+            Financial District to Brooklyn Bridge, with budget-friendly food stops
+            along the way.
+          </p>
+          <div className="top-info">
+            <span>
+              <GrLocation className="location-icon" />
+              6-8 hours
+            </span>
+            <span>4.2 miles</span>
+            <span>$ 15</span>
+          </div>
+        </div>
+      </div>
+
+
+      <div className="explore-section">
+        <div className="section-label" style={{ padding: 0 }}>
+          <span>EXPLORE</span>
+        </div>
+
+
+        <div className="filter-row">
+          {["ALL", "FOOD", "TOURIST SPOTS", "RAINY DAY", "NIGHTLIFE", "BUDGET"].map((f) => (
+            <button key={f} className="filter-pill">{f}</button>
+          ))}
+        </div>
+
+
+        <div className="grid">
+          {places.map((place, index) => (
+            <div
+              className={`card ${index % 2 === 0 ? "hover-pink" : "hover-light"}`}
+              key={index}
+            >
+              <div className="img" />
+              <div className="card-body">
+                {place.tags.map((tag, i) => (
+                  <span key={i} className={tag === "FREE" ? "badge" : "blackb"}>
+                    {tag}
+                  </span>
+                ))}
+                <h3>{place.title}</h3>
+                <p>{place.desc}</p>
+                <div className="location">
+                  <GrLocation className="location-icon" />
+                  <span>{place.location}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
