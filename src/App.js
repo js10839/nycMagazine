@@ -4,7 +4,6 @@ import TodaysCourse from "./components/TodaysCourse";
 import Contents from "./components/Contents";
 import places from "./data/places";
 
-// First 3 places are featured in the slider
 const todayCards = places.slice(0, 3);
 
 function App() {
