@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { GrLocation } from "react-icons/gr";
 import "./App.css";
 
@@ -121,7 +122,7 @@ const VISIBLE = 3;
 function getCardStyle(offset) {
   const base = {
     position: "absolute",
-    width: "75%",
+    width: "50%",
     top: 0,
     left: 0,
     height: "100%",
@@ -134,12 +135,22 @@ function getCardStyle(offset) {
 }
 
 export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<MainPage />} />
+    
+    </Routes>
+  );
+}
+
+function MainPage() {
+  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [dragStartX, setDragStartX] = useState(null);
 
   const goTo = (idx) => { if (idx !== current) setCurrent(idx); };
-  const next = () => { if (current < featuredPlaces.length - 1) setCurrent(c => c + 1); };
-  const prev = () => { if (current > 0) setCurrent(c => c - 1); };
+  const next = () => setCurrent(c => (c + 1) % featuredPlaces.length);
+  const prev = () => setCurrent(c => (c - 1 + featuredPlaces.length) % featuredPlaces.length);
 
   const handleMouseDown = (e) => setDragStartX(e.clientX);
   const handleMouseUp = (e) => {
@@ -159,14 +170,12 @@ export default function App() {
   };
 
   const visibleCards = Array.from({ length: VISIBLE }, (_, i) => {
-    const idx = current + i;
-    if (idx >= featuredPlaces.length) return null;
+    const idx = (current + i) % featuredPlaces.length;
     return { ...featuredPlaces[idx], idx, offset: i };
-  }).filter(Boolean).reverse();
+  }).reverse();
 
   return (
     <>
-
       <nav className="nav">
         <span className="nav-brand">NYC EDIT</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2">
@@ -175,16 +184,16 @@ export default function App() {
       </nav>
       <div className="nav-line" />
 
-
-      <div className="section-label">
+      <div
+        className="section-label"
+        onClick={() => navigate("/courses")}
+        style={{ cursor: "pointer" }}
+      >
         <span>TODAY'S COURSE</span>
         <span className="arrow">→</span>
       </div>
 
-
       <div className="course-section">
-
-
         <div className="slider-col">
           <div
             className="slider-window"
@@ -235,7 +244,6 @@ export default function App() {
           </div>
         </div>
 
-
         <div className="desc-panel">
           <h1>Lower Manhattan Budget Day</h1>
           <p>
@@ -255,19 +263,16 @@ export default function App() {
         </div>
       </div>
 
-
       <div className="explore-section">
         <div className="section-label" style={{ padding: 0 }}>
           <span>EXPLORE</span>
         </div>
-
 
         <div className="filter-row">
           {["ALL", "FOOD", "TOURIST SPOTS", "RAINY DAY", "NIGHTLIFE", "BUDGET"].map((f) => (
             <button key={f} className="filter-pill">{f}</button>
           ))}
         </div>
-
 
         <div className="grid">
           {places.map((place, index) => (
